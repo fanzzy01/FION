@@ -186,16 +186,13 @@ Library.Scheme = Library.Scheme or {
     HoverColor      = Color3.fromRGB(22, 22, 26),
 }
 
--- ============================================================
--- FIX: Default watermark icon pakai logo kamu
--- ============================================================
 Library.Watermark = {
     Enabled = false,
     ShowTime = true,
     ShowFPS = true,
     ShowPing = true,
     Text = "FionHub",
-    Icon = "rbxassetid://84662895793846",  -- <-- FIX: logo kamu
+    Icon = "rbxassetid://84662895793846",
 }
 
 Library.Toggles = {}
@@ -434,8 +431,8 @@ function Library:CreateWindow(options)
     local sphWords = "FH"
     local sphImage = nil
     local topbarLogo = nil
-    local logoSize = 32
-    local sphIconSize = 50
+    local logoSize = 44
+    local sphIconSize = 30
     
     local isMobileDevice = UserInputService.TouchEnabled
     if not isMobileDevice then
@@ -484,16 +481,13 @@ function Library:CreateWindow(options)
             end
         end
         
-        -- ============================================================
-        -- FIX: Default logo kalau user nggak pass Logo
-        -- ============================================================
         sphImage = options.SphereImage
-        topbarLogo = options.Logo or "rbxassetid://84662895793846"  -- <-- FIX: default logo
-        logoSize = options.LogoSize or 32
-        sphIconSize = options.SphereIconSize or 26
+        topbarLogo = options.Logo or "rbxassetid://84662895793846"
+        logoSize = options.LogoSize or 44
+        sphIconSize = options.SphereIconSize or 30
     elseif type(options) == "string" then
         hubName = options
-        topbarLogo = "rbxassetid://84662895793846"  -- <-- FIX: default logo
+        topbarLogo = "rbxassetid://84662895793846"
     end
 
     local uniqueID = HttpService:GenerateGUID(false)
@@ -557,8 +551,8 @@ function Library:CreateWindow(options)
     local HomeIcon = Create("ImageLabel", {
         Parent = CenterPill,
         BackgroundTransparency = 1,
-        Size = UDim2.new(0, 14, 0, 14),
-        Position = UDim2.new(0, 10, 0.5, -7),
+        Size = UDim2.new(0, 20, 0, 20),
+        Position = UDim2.new(0, 10, 0.5, -10),
         Image = (Library.Watermark and Library.Watermark.Icon) or "rbxassetid://84662895793846",
         ImageColor3 = Color3.fromRGB(210, 215, 225),
         ZIndex = 182,
@@ -567,8 +561,8 @@ function Library:CreateWindow(options)
     local CenterText = Create("TextLabel", {
         Parent = CenterPill,
         BackgroundTransparency = 1,
-        Position = UDim2.new(0, 28, 0, 0),
-        Size = UDim2.new(1, -36, 1, 0),
+        Position = UDim2.new(0, 36, 0, 0),
+        Size = UDim2.new(1, -44, 1, 0),
         Font = Enum.Font.GothamMedium,
         TextSize = 12,
         TextColor3 = Color3.fromRGB(230, 233, 240),
@@ -584,7 +578,7 @@ function Library:CreateWindow(options)
 
     local function FitPill(str)
         local size = TextService:GetTextSize(str, 12, Enum.Font.GothamMedium, Vector2.new(600, 28))
-        local w = math.clamp(size.X + 48, 140, 360)
+        local w = math.clamp(size.X + 56, 140, 360)
         WatermarkHold.Size = UDim2.new(0, w, 0, 28)
     end
 
@@ -738,11 +732,14 @@ function Library:CreateWindow(options)
         Btn.MouseButton1Click:Connect(function() OpenInfoWindow(data) end)
     end
 
+    -- ============================================================
+    -- FIX: WINDOW POSISI AGAK KE BAWAH + BACKGROUND
+    -- ============================================================
     local MainFrame = Create("Frame", {
         Parent = ScreenGui,
         BackgroundColor3 = BackgroundColor,
         Size = UDim2.new(0, WIN_W, 0, WIN_H),
-        Position = UDim2.new(0.5, 0, 0.5, 0),
+        Position = UDim2.new(0.5, 0, 0.5, 40),    -- <-- 40 = turun dikit
         AnchorPoint = Vector2.new(0.5, 0.5),
         ClipsDescendants = true,
         BackgroundTransparency = 1,
@@ -760,23 +757,28 @@ function Library:CreateWindow(options)
         Size = UDim2.new(0, 350, 0, 30),
         AnchorPoint = Vector2.new(0.5, 0.5),
         ZIndex = 145,
-        Active = true
+        Active = true,
+        Visible = false     -- <-- HIDE BOTTOM DRAG HITBOX
     })
 
+    -- ============================================================
+    -- FIX: GARIS BAWAH DIHILANGIN TOTAL
+    -- ============================================================
     local FloatingBottomBar = Create("Frame", {
         Parent = BottomDragHitbox,
         BackgroundColor3 = CardColor,
-        BackgroundTransparency = 0,
+        BackgroundTransparency = 1,    -- <-- transparan total
         Size = UDim2.new(1, 0, 0, 6),
         Position = UDim2.new(0, 0, 0.5, -3),
-        ZIndex = 146
+        ZIndex = 146,
+        Visible = false                -- <-- hide
     })
     Create("UICorner", {Parent = FloatingBottomBar, CornerRadius = UDim.new(1, 0)})
     local BottomBarStroke = Create("UIStroke", {
         Parent = FloatingBottomBar, 
         Color = Color3.fromRGB(50, 50, 55), 
         Thickness = 1.2, 
-        Transparency = 0
+        Transparency = 1                -- <-- stroke transparan
     })
 
     MakeDraggable(BottomDragHitbox, MainFrame)
@@ -829,20 +831,18 @@ function Library:CreateWindow(options)
     end)
     if BarConn then pcall(function() BarConn:Disconnect() end) end
     if _G.FionHub_BarConn then pcall(function() _G.FionHub_BarConn:Disconnect() end) end
+    
+    -- ============================================================
+    -- FIX: LOOP HIDE GARIS BAWAH TERUS-TERUSAN
+    -- ============================================================
     BarConn = Track(RunService.Heartbeat:Connect(function()
         if not MainFrame or not MainFrame.Parent or not MainFrame.Visible then return end
         if not BottomDragHitbox or not BottomDragHitbox.Parent then return end
         pcall(function()
-            local scale = MainScale.Scale
-            local frameHeight = WIN_H * scale
-            local frameWidth = WIN_W * scale
-            BottomDragHitbox.Position = UDim2.new(
-                MainFrame.Position.X.Scale,
-                MainFrame.Position.X.Offset,
-                MainFrame.Position.Y.Scale,
-                MainFrame.Position.Y.Offset + (frameHeight / 2) + 20
-            )
-            BottomDragHitbox.Size = UDim2.new(0, frameWidth * 0.6, 0, 30 * scale)
+            BottomDragHitbox.Visible = false
+            FloatingBottomBar.Visible = false
+            FloatingBottomBar.BackgroundTransparency = 1
+            BottomBarStroke.Transparency = 1
         end)
     end))
     _G.FionHub_BarConn = BarConn
@@ -865,12 +865,12 @@ function Library:CreateWindow(options)
         UserInputService.MouseIconEnabled = Library.OriginalMouseIconEnabled == true
     end)
 
-    local TopBar = Create("Frame", {Parent = MainFrame, BackgroundColor3 = BackgroundColor, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 40), Position = UDim2.new(0, 0, 0, 0), Active = true})
+    local TopBar = Create("Frame", {Parent = MainFrame, BackgroundColor3 = BackgroundColor, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 50), Position = UDim2.new(0, 0, 0, 0), Active = true})
     MakeDraggable(TopBar, MainFrame)
     
     local titleOffsetX = 15
     -- ============================================================
-    -- FIX: Logo selalu muncul dengan ZIndex tinggi
+    -- FIX: LOGO GEDE + SELALU MUNCUL
     -- ============================================================
     if topbarLogo then
         local TopbarIcon = Create("ImageLabel", {
@@ -931,7 +931,7 @@ function Library:CreateWindow(options)
     Library:ApplyIcon(MoveIcon, "move", AccentColor)
     MakeDraggable(MoveBtn, MainFrame)
 
-    local Sidebar = Create("Frame", {Parent = MainFrame, BackgroundColor3 = BackgroundColor, BackgroundTransparency = 1, Size = UDim2.new(0, SIDE_W, 1, -40), Position = UDim2.new(0, 0, 0, 40), Active = true})
+    local Sidebar = Create("Frame", {Parent = MainFrame, BackgroundColor3 = BackgroundColor, BackgroundTransparency = 1, Size = UDim2.new(0, SIDE_W, 1, -50), Position = UDim2.new(0, 0, 0, 50), Active = true})
     local TabSearchBox = Create("TextBox", {Parent = Sidebar, BackgroundColor3 = CardColor, Size = UDim2.new(1, -20, 0, 26), Position = UDim2.new(0, 10, 0, 5), Font = Enum.Font.Gotham, TextSize = 12, TextColor3 = TextColor, PlaceholderText = "Search tabs...", TextXAlignment = Enum.TextXAlignment.Left, ClearTextOnFocus = false})
     if SIDE_W <= 60 then
         TabSearchBox.Visible = false
@@ -1036,11 +1036,11 @@ function Library:CreateWindow(options)
         Text = "@" .. maskUserName(LP.Name),
     })
     
-    local Divider = Create("Frame", {Parent = MainFrame, BackgroundColor3 = Color3.fromRGB(40, 40, 45), BorderSizePixel = 0, Size = UDim2.new(0, 1, 1, -40), Position = UDim2.new(0, SIDE_W, 0, 40)})
-    local ContentArea = Create("Frame", {Parent = MainFrame, BackgroundTransparency = 1, Size = UDim2.new(1, -(SIDE_W + 5), 1, -40), Position = UDim2.new(0, SIDE_W + 5, 0, 40), Active = true})
+    local Divider = Create("Frame", {Parent = MainFrame, BackgroundColor3 = Color3.fromRGB(40, 40, 45), BorderSizePixel = 0, Size = UDim2.new(0, 1, 1, -50), Position = UDim2.new(0, SIDE_W, 0, 50)})
+    local ContentArea = Create("Frame", {Parent = MainFrame, BackgroundTransparency = 1, Size = UDim2.new(1, -(SIDE_W + 5), 1, -50), Position = UDim2.new(0, SIDE_W + 5, 0, 50), Active = true})
 
     -- ============================================================
-    -- FIX: Sphere (tombol toggle) — default pakai logo kamu
+    -- FIX: Sphere (tombol toggle) — pakai logo kamu
     -- ============================================================
     local Sphere = Create("ImageButton", {Parent = ScreenGui, BackgroundColor3 = BackgroundColor, BackgroundTransparency = 0.2, Size = UDim2.new(0, 44, 0, 44), Position = UDim2.new(0, 16, 0, 160), AnchorPoint = Vector2.new(0, 0), Visible = false, AutoButtonColor = false, ImageTransparency = 1, ClipsDescendants = true})
     Create("UICorner", {Parent = Sphere, CornerRadius = UDim.new(0, 8)})
@@ -1218,7 +1218,7 @@ function Library:CreateWindow(options)
 
     local function ShowWindow()
         MainFrame.Visible = true
-        BottomDragHitbox.Visible = true
+        BottomDragHitbox.Visible = false
         MainScale.Scale = 0.96
         if isMobileDevice then
             Sphere.Visible = true
@@ -1247,7 +1247,6 @@ function Library:CreateWindow(options)
         Window.CurrentTransparency = val
         if MainFrame.Visible then
             Tween(MainFrame, {BackgroundTransparency = val}, 0.3)
-            Tween(FloatingBottomBar, {BackgroundTransparency = val > 0 and 0.2 or 0}, 0.3)
         end
     end
 
@@ -1399,7 +1398,8 @@ function Library:CreateWindow(options)
                 SendPremiumNotification()
                 return
             end
-            if Window.CurrentTab == TabConfig then return end            for _, other in ipairs(Window.Tabs) do
+            if Window.CurrentTab == TabConfig then return end
+            for _, other in ipairs(Window.Tabs) do
                 if other.Content then other.Content.Visible = false end
                 if other.Button then Tween(other.Button, {BackgroundTransparency = 1}, 0.15) end
                 if other.Indicator then Tween(other.Indicator, {Size = UDim2.new(0, 3, 0, 0)}, 0.15) end
@@ -2876,12 +2876,12 @@ function Library:CreateWindow(options)
                     AddInfoIcon(ManagerFrame, UDim2.new(1, -20, 0, -22), {
                         Title = "Saves Loader Config Protocol",
                         Description = "Welcome to the Saves System. Here are your instructions:\n\n" ..
-                        "1. Create a Save: Type a name in the text box below and click 'Create Save'. This executes the configuration saving.\n" ..
-                        "2. Create a Name: Any string is valid. Naming it the exact same as an existing save will not overwrite the old one; it inherently creates a new duplicate file seamlessly.\n" ..
-                        "3. Delete a Save Loader: Click 'Delete Mode: OFF' to toggle it ON. Click the file you want deleted (it turns red). Click 'Delete Selected'. A prompt will appear; click Yes to permanently erase.\n" ..
-                        "4. Saves Loader Functionality: The system pulls all modified user data (Toggles, Sliders, Colors) and exports it securely as JSON to your workspace. Clicking 'Load' pulls it back in.\n" ..
-                        "5. Edit / Overwrite: Click 'Edit' on a save. Change the name inside the input box, then click 'Save Edit'. This effectively edits the target.\n" ..
-                        "6. Unedit Saves Loader: If you mistakenly clicked 'Edit' or 'Delete Mode', simply click the 'Cancel' button to back out without causing changes."
+                        "1. Create a Save: Type a name in the text box below and click 'Create Save'.\n" ..
+                        "2. Create a Name: Any string is valid.\n" ..
+                        "3. Delete a Save: Click 'Delete Mode: OFF' to toggle it ON.\n" ..
+                        "4. Saves Functionality: Load config back.\n" ..
+                        "5. Edit / Overwrite: Click 'Edit' on a save.\n" ..
+                        "6. Unedit: Click Cancel to back out."
                     })
 
                     local InternalConfirmPopup = Create("Frame", {Parent = ManagerFrame, BackgroundColor3 = Color3.fromRGB(20, 20, 24), Size = UDim2.new(1, -20, 1, -20), Position = UDim2.new(0, 10, 0, 10), ZIndex = 60, BackgroundTransparency = 1, Visible = false})
@@ -2889,7 +2889,7 @@ function Library:CreateWindow(options)
                     Create("UIStroke", {Parent = InternalConfirmPopup, Color = Color3.fromRGB(180, 50, 50), Thickness = 1, Transparency = 1})
                     
                     local P_Title = Create("TextLabel", {Parent = InternalConfirmPopup, Text = "Confirm Deletion?", Font = Enum.Font.GothamBold, TextSize = 14, TextColor3 = Color3.fromRGB(255, 60, 60), BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 30), Position = UDim2.new(0, 0, 0, 40), TextTransparency = 1, ZIndex = 61})
-                    local P_Desc = Create("TextLabel", {Parent = InternalConfirmPopup, Text = "You are about to delete these specific saves loaders permanently.", Font = Enum.Font.Gotham, TextSize = 12, TextColor3 = SubTextColor, BackgroundTransparency = 1, Size = UDim2.new(1, -40, 0, 40), Position = UDim2.new(0, 20, 0, 70), TextWrapped = true, TextTransparency = 1, ZIndex = 61})
+                    local P_Desc = Create("TextLabel", {Parent = InternalConfirmPopup, Text = "Delete these saves permanently?", Font = Enum.Font.Gotham, TextSize = 12, TextColor3 = SubTextColor, BackgroundTransparency = 1, Size = UDim2.new(1, -40, 0, 40), Position = UDim2.new(0, 20, 0, 70), TextWrapped = true, TextTransparency = 1, ZIndex = 61})
                     
                     local P_Yes = Create("TextButton", {Parent = InternalConfirmPopup, Text = "Yes", Font = Enum.Font.GothamBold, TextSize = 13, TextColor3 = Color3.fromRGB(255, 255, 255), BackgroundColor3 = Color3.fromRGB(180, 50, 50), Size = UDim2.new(0.5, -30, 0, 30), Position = UDim2.new(0, 20, 0, 130), AutoButtonColor = false, BackgroundTransparency = 1, TextTransparency = 1, ZIndex = 61})
                     Create("UICorner", {Parent = P_Yes, CornerRadius = UDim.new(0, 4)})
@@ -2971,7 +2971,6 @@ function Library:CreateWindow(options)
                                         Tween(Row, {BackgroundColor3 = Color3.fromRGB(40, 50, 70)}, 0.2)
                                     end
                                 end)
-                                       
 
                                 LoadBtn.MouseButton1Click:Connect(function()
                                     if deleteMode or editMode then return end
@@ -3090,7 +3089,7 @@ function Library:CreateWindow(options)
                         ActionArea.Visible = false
                         CreateBtn.Visible = true
                         RefreshMonitor()
-                        Library:Notify({Title = "Deletions Complete", Description = "Selected saves erased from system."})
+                        Library:Notify({Title = "Deletions Complete", Description = "Selected saves erased."})
                         HideInternalPopup()
                     end)
 
