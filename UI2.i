@@ -431,8 +431,8 @@ function Library:CreateWindow(options)
     local sphWords = "FH"
     local sphImage = nil
     local topbarLogo = nil
-    local logoSize = 70
-    local sphIconSize = 30
+    local logoSize = 50       -- FIX: logo topbar lebih gede
+    local sphIconSize = 48    -- FIX: logo di tombol sphere lebih gede
     
     local isMobileDevice = UserInputService.TouchEnabled
     if not isMobileDevice then
@@ -483,8 +483,8 @@ function Library:CreateWindow(options)
         
         sphImage = options.SphereImage
         topbarLogo = options.Logo or "rbxassetid://84662895793846"
-        logoSize = options.LogoSize or 44
-        sphIconSize = options.SphereIconSize or 30
+        logoSize = options.LogoSize or 50
+        sphIconSize = options.SphereIconSize or 48
     elseif type(options) == "string" then
         hubName = options
         topbarLogo = "rbxassetid://84662895793846"
@@ -548,11 +548,12 @@ function Library:CreateWindow(options)
         Transparency = 0.25,
     })
 
+    -- FIX: logo watermark lebih gede
     local HomeIcon = Create("ImageLabel", {
         Parent = CenterPill,
         BackgroundTransparency = 1,
-        Size = UDim2.new(0, 20, 0, 20),
-        Position = UDim2.new(0, 10, 0.5, -10),
+        Size = UDim2.new(0, 22, 0, 22),
+        Position = UDim2.new(0, 10, 0.5, -11),
         Image = (Library.Watermark and Library.Watermark.Icon) or "rbxassetid://84662895793846",
         ImageColor3 = Color3.fromRGB(210, 215, 225),
         ZIndex = 182,
@@ -561,8 +562,8 @@ function Library:CreateWindow(options)
     local CenterText = Create("TextLabel", {
         Parent = CenterPill,
         BackgroundTransparency = 1,
-        Position = UDim2.new(0, 36, 0, 0),
-        Size = UDim2.new(1, -44, 1, 0),
+        Position = UDim2.new(0, 40, 0, 0),
+        Size = UDim2.new(1, -48, 1, 0),
         Font = Enum.Font.GothamMedium,
         TextSize = 12,
         TextColor3 = Color3.fromRGB(230, 233, 240),
@@ -578,7 +579,7 @@ function Library:CreateWindow(options)
 
     local function FitPill(str)
         local size = TextService:GetTextSize(str, 12, Enum.Font.GothamMedium, Vector2.new(600, 28))
-        local w = math.clamp(size.X + 56, 140, 360)
+        local w = math.clamp(size.X + 60, 160, 400)
         WatermarkHold.Size = UDim2.new(0, w, 0, 28)
     end
 
@@ -732,14 +733,12 @@ function Library:CreateWindow(options)
         Btn.MouseButton1Click:Connect(function() OpenInfoWindow(data) end)
     end
 
-    -- ============================================================
-    -- FIX: WINDOW POSISI AGAK KE BAWAH + BACKGROUND
-    -- ============================================================
+    -- FIX: window agak turun ke bawah
     local MainFrame = Create("Frame", {
         Parent = ScreenGui,
         BackgroundColor3 = BackgroundColor,
         Size = UDim2.new(0, WIN_W, 0, WIN_H),
-        Position = UDim2.new(0.5, 0, 0.5, 40),    -- <-- 40 = turun dikit
+        Position = UDim2.new(0.5, 0, 0.5, 40),
         AnchorPoint = Vector2.new(0.5, 0.5),
         ClipsDescendants = true,
         BackgroundTransparency = 1,
@@ -751,6 +750,7 @@ function Library:CreateWindow(options)
     Tween(MainScale, {Scale = 1}, 0.5)
     Tween(MainFrame, {BackgroundTransparency = 0}, 0.5)
 
+    -- FIX: BottomDragHitbox di-hide
     local BottomDragHitbox = Create("Frame", {
         Parent = ScreenGui,
         BackgroundTransparency = 1,
@@ -758,27 +758,25 @@ function Library:CreateWindow(options)
         AnchorPoint = Vector2.new(0.5, 0.5),
         ZIndex = 145,
         Active = true,
-        Visible = false     -- <-- HIDE BOTTOM DRAG HITBOX
+        Visible = false
     })
 
-    -- ============================================================
-    -- FIX: GARIS BAWAH DIHILANGIN TOTAL
-    -- ============================================================
+    -- FIX: Garis bawah transparan total
     local FloatingBottomBar = Create("Frame", {
         Parent = BottomDragHitbox,
         BackgroundColor3 = CardColor,
-        BackgroundTransparency = 1,    -- <-- transparan total
+        BackgroundTransparency = 1,
         Size = UDim2.new(1, 0, 0, 6),
         Position = UDim2.new(0, 0, 0.5, -3),
         ZIndex = 146,
-        Visible = false                -- <-- hide
+        Visible = false
     })
     Create("UICorner", {Parent = FloatingBottomBar, CornerRadius = UDim.new(1, 0)})
     local BottomBarStroke = Create("UIStroke", {
         Parent = FloatingBottomBar, 
         Color = Color3.fromRGB(50, 50, 55), 
         Thickness = 1.2, 
-        Transparency = 1                -- <-- stroke transparan
+        Transparency = 1
     })
 
     MakeDraggable(BottomDragHitbox, MainFrame)
@@ -832,12 +830,9 @@ function Library:CreateWindow(options)
     if BarConn then pcall(function() BarConn:Disconnect() end) end
     if _G.FionHub_BarConn then pcall(function() _G.FionHub_BarConn:Disconnect() end) end
     
-    -- ============================================================
-    -- FIX: LOOP HIDE GARIS BAWAH TERUS-TERUSAN
-    -- ============================================================
+    -- FIX: Auto-hide garis
     BarConn = Track(RunService.Heartbeat:Connect(function()
         if not MainFrame or not MainFrame.Parent or not MainFrame.Visible then return end
-        if not BottomDragHitbox or not BottomDragHitbox.Parent then return end
         pcall(function()
             BottomDragHitbox.Visible = false
             FloatingBottomBar.Visible = false
@@ -865,13 +860,10 @@ function Library:CreateWindow(options)
         UserInputService.MouseIconEnabled = Library.OriginalMouseIconEnabled == true
     end)
 
-    local TopBar = Create("Frame", {Parent = MainFrame, BackgroundColor3 = BackgroundColor, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 50), Position = UDim2.new(0, 0, 0, 0), Active = true})
+    local TopBar = Create("Frame", {Parent = MainFrame, BackgroundColor3 = BackgroundColor, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 55), Position = UDim2.new(0, 0, 0, 0), Active = true})
     MakeDraggable(TopBar, MainFrame)
     
     local titleOffsetX = 15
-    -- ============================================================
-    -- FIX: LOGO GEDE + SELALU MUNCUL
-    -- ============================================================
     if topbarLogo then
         local TopbarIcon = Create("ImageLabel", {
             Parent = TopBar,
@@ -931,7 +923,7 @@ function Library:CreateWindow(options)
     Library:ApplyIcon(MoveIcon, "move", AccentColor)
     MakeDraggable(MoveBtn, MainFrame)
 
-    local Sidebar = Create("Frame", {Parent = MainFrame, BackgroundColor3 = BackgroundColor, BackgroundTransparency = 1, Size = UDim2.new(0, SIDE_W, 1, -50), Position = UDim2.new(0, 0, 0, 50), Active = true})
+    local Sidebar = Create("Frame", {Parent = MainFrame, BackgroundColor3 = BackgroundColor, BackgroundTransparency = 1, Size = UDim2.new(0, SIDE_W, 1, -55), Position = UDim2.new(0, 0, 0, 55), Active = true})
     local TabSearchBox = Create("TextBox", {Parent = Sidebar, BackgroundColor3 = CardColor, Size = UDim2.new(1, -20, 0, 26), Position = UDim2.new(0, 10, 0, 5), Font = Enum.Font.Gotham, TextSize = 12, TextColor3 = TextColor, PlaceholderText = "Search tabs...", TextXAlignment = Enum.TextXAlignment.Left, ClearTextOnFocus = false})
     if SIDE_W <= 60 then
         TabSearchBox.Visible = false
@@ -1036,18 +1028,51 @@ function Library:CreateWindow(options)
         Text = "@" .. maskUserName(LP.Name),
     })
     
-    local Divider = Create("Frame", {Parent = MainFrame, BackgroundColor3 = Color3.fromRGB(40, 40, 45), BorderSizePixel = 0, Size = UDim2.new(0, 1, 1, -50), Position = UDim2.new(0, SIDE_W, 0, 50)})
-    local ContentArea = Create("Frame", {Parent = MainFrame, BackgroundTransparency = 1, Size = UDim2.new(1, -(SIDE_W + 5), 1, -50), Position = UDim2.new(0, SIDE_W + 5, 0, 50), Active = true})
+    local Divider = Create("Frame", {Parent = MainFrame, BackgroundColor3 = Color3.fromRGB(40, 40, 45), BorderSizePixel = 0, Size = UDim2.new(0, 1, 1, -55), Position = UDim2.new(0, SIDE_W, 0, 55)})
+    local ContentArea = Create("Frame", {Parent = MainFrame, BackgroundTransparency = 1, Size = UDim2.new(1, -(SIDE_W + 5), 1, -55), Position = UDim2.new(0, SIDE_W + 5, 0, 55), Active = true})
 
     -- ============================================================
-    -- FIX: Sphere (tombol toggle) — pakai logo kamu
+    -- FIX: SPHERE - tombol kotak di tengah jadi GEDE + LOGO GEDE
     -- ============================================================
-    local Sphere = Create("ImageButton", {Parent = ScreenGui, BackgroundColor3 = BackgroundColor, BackgroundTransparency = 0.2, Size = UDim2.new(0, 44, 0, 44), Position = UDim2.new(0, 16, 0, 160), AnchorPoint = Vector2.new(0, 0), Visible = false, AutoButtonColor = false, ImageTransparency = 1, ClipsDescendants = true})
-    Create("UICorner", {Parent = Sphere, CornerRadius = UDim.new(0, 8)})
+    local SPHERE_SIZE = 64
+    local SPHERE_ICON = sphIconSize  -- otomatis 48 default
+
+    local Sphere = Create("ImageButton", {
+        Parent = ScreenGui, 
+        BackgroundColor3 = BackgroundColor, 
+        BackgroundTransparency = 0.2, 
+        Size = UDim2.new(0, SPHERE_SIZE, 0, SPHERE_SIZE),
+        Position = UDim2.new(0, 16, 0, 160), 
+        AnchorPoint = Vector2.new(0, 0), 
+        Visible = false, 
+        AutoButtonColor = false, 
+        ImageTransparency = 1, 
+        ClipsDescendants = true
+    })
+    Create("UICorner", {Parent = Sphere, CornerRadius = UDim.new(0, 12)})
     Create("UIStroke", {Parent = Sphere, Color = OutlineColor, Thickness = 1.5})
     
-    local SphereImageLabel = Create("ImageLabel", {Parent = Sphere, BackgroundTransparency = 1, Size = UDim2.new(0, sphIconSize, 0, sphIconSize), Position = UDim2.new(0.5, 0, 0.5, 0), AnchorPoint = Vector2.new(0.5, 0.5), Image = sphImage or "rbxassetid://84662895793846", ImageTransparency = 1, Visible = (not sphTextToggle)})
-    local SphereTextLabel = Create("TextLabel", {Parent = Sphere, Text = sphWords, Font = Enum.Font.GothamBold, TextSize = 16, TextColor3 = AccentColor, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 1, 0), TextTransparency = 1, Visible = sphTextToggle})
+    local SphereImageLabel = Create("ImageLabel", {
+        Parent = Sphere, 
+        BackgroundTransparency = 1, 
+        Size = UDim2.new(0, SPHERE_ICON, 0, SPHERE_ICON), 
+        Position = UDim2.new(0.5, 0, 0.5, 0), 
+        AnchorPoint = Vector2.new(0.5, 0.5), 
+        Image = sphImage or "rbxassetid://84662895793846", 
+        ImageTransparency = 1, 
+        Visible = true
+    })
+    local SphereTextLabel = Create("TextLabel", {
+        Parent = Sphere, 
+        Text = sphWords, 
+        Font = Enum.Font.GothamBold, 
+        TextSize = 16, 
+        TextColor3 = AccentColor, 
+        BackgroundTransparency = 1, 
+        Size = UDim2.new(1, 0, 1, 0), 
+        TextTransparency = 1, 
+        Visible = false
+    })
     MakeDraggable(Sphere, Sphere)
     
     local CustomCursor = Create("Frame", {
@@ -1205,12 +1230,8 @@ function Library:CreateWindow(options)
         BottomDragHitbox.Visible = false
         if isMobileDevice then
             Sphere.Visible = true
-            Tween(Sphere, {Size = UDim2.new(0, 44, 0, 44)}, 0.2)
-            if not sphTextToggle then
-                Tween(SphereImageLabel, {ImageTransparency = 0}, 0.2)
-            else
-                Tween(SphereTextLabel, {TextTransparency = 0}, 0.2)
-            end
+            Tween(Sphere, {Size = UDim2.new(0, SPHERE_SIZE, 0, SPHERE_SIZE)}, 0.2)
+            Tween(SphereImageLabel, {ImageTransparency = 0}, 0.2)
         else
             Sphere.Visible = false
         end
@@ -1222,12 +1243,8 @@ function Library:CreateWindow(options)
         MainScale.Scale = 0.96
         if isMobileDevice then
             Sphere.Visible = true
-            Sphere.Size = UDim2.new(0, 44, 0, 44)
-            if not sphTextToggle then
-                SphereImageLabel.ImageTransparency = 0
-            else
-                SphereTextLabel.TextTransparency = 0
-            end
+            Sphere.Size = UDim2.new(0, SPHERE_SIZE, 0, SPHERE_SIZE)
+            SphereImageLabel.ImageTransparency = 0
         else
             Sphere.Visible = false
         end
@@ -1262,14 +1279,9 @@ function Library:CreateWindow(options)
 
     if isMobileDevice then
         Sphere.Visible = true
-        Sphere.Size = UDim2.new(0, 44, 0, 44)
-        if not sphTextToggle then
-            SphereImageLabel.ImageTransparency = 0
-            SphereImageLabel.Visible = true
-        else
-            SphereTextLabel.TextTransparency = 0
-            SphereTextLabel.Visible = true
-        end
+        Sphere.Size = UDim2.new(0, SPHERE_SIZE, 0, SPHERE_SIZE)
+        SphereImageLabel.ImageTransparency = 0
+        SphereImageLabel.Visible = true
     end
 
     TabSearchBox:GetPropertyChangedSignal("Text"):Connect(function()
