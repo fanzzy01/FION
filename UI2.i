@@ -1051,7 +1051,7 @@ function Library:CreateWindow(options)
         Size = UDim2.new(0, sphIconSize, 0, sphIconSize), 
         Position = UDim2.new(0.5, 0, 0.5, 0), 
         AnchorPoint = Vector2.new(0.5, 0.5), 
-        Image = sphImage or "rbxassetid://84662895793846", 
+        Image = sphImage or "rbxassetid://101468688188732", 
         ImageTransparency = 1, 
         Visible = true
     })
