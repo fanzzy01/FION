@@ -431,7 +431,7 @@ function Library:CreateWindow(options)
     local sphWords = "FH"
     local sphImage = nil
     local topbarLogo = nil
-    local logoSize = 50       -- FIX: logo topbar lebih gede
+    local logoSize = 32       -- FIX: logo topbar lebih gede
     local sphIconSize = 48    -- FIX: logo di tombol sphere lebih gede
     
     local isMobileDevice = UserInputService.TouchEnabled
