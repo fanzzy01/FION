@@ -1,4 +1,4 @@
--- // PanduX UI Library (Core Engine) - Optimized for Pandu Lag Loops
+-- // FionHub UI Library (Core Engine) - Optimized for Fion
 
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
@@ -15,7 +15,7 @@ local Library = {
 -- // Tambahkan ini setelah local Library
 local LocalPlayer = game:GetService("Players").LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
-local ShowCursorBinding = "PanduCursorUpdate"  -- Nama binding untuk RenderStep
+local ShowCursorBinding = "FionCursorUpdate"  -- Nama binding untuk RenderStep
 
 -- // Utility: File System Mock Overrides
 local _isfolder = isfolder or function() return true end
@@ -136,7 +136,6 @@ local function MakeDraggable(topbar, object)
     UserInputService.InputChanged:Connect(function(input)
         if input == dragInput and dragging then
             local delta = input.Position - dragStart
-            -- [UBAH] langsung set posisi, tanpa tween biar drag tidak patah
             object.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         end
     end)
@@ -164,13 +163,13 @@ function Library:Unload()
         pcall(function() c:Disconnect() end)
     end
     table.clear(Library._Conns)
-    if _G.PanduX_WMConn then
-        pcall(function() _G.PanduX_WMConn:Disconnect() end)
-        _G.PanduX_WMConn = nil
+    if _G.FionHub_WMConn then
+        pcall(function() _G.FionHub_WMConn:Disconnect() end)
+        _G.FionHub_WMConn = nil
     end
-    if _G.PanduX_BarConn then
-        pcall(function() _G.PanduX_BarConn:Disconnect() end)
-        _G.PanduX_BarConn = nil
+    if _G.FionHub_BarConn then
+        pcall(function() _G.FionHub_BarConn:Disconnect() end)
+        _G.FionHub_BarConn = nil
     end
     pcall(function()
         UserInputService.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.None
@@ -209,7 +208,7 @@ Library.Watermark = {
     ShowTime = true,
     ShowFPS = true,
     ShowPing = true,
-    Text = "Pandu",
+    Text = "FionHub",
     Icon = "rbxassetid://6031097226",
 }
 
@@ -298,7 +297,7 @@ end
 function Library:SafeCallback(fn, ...)
     if type(fn) ~= "function" then return end
     local ok, err = pcall(fn, ...)
-    if not ok then warn("[PanduX callback]", err) end
+    if not ok then warn("[FionHub callback]", err) end
 end
 
 local function PullCallback(v)
@@ -323,7 +322,7 @@ function Library:Notify(options)
     local Notif = Create("Frame", {
         Parent = GlobalNotifContainer,
         BackgroundColor3 = Color3.fromRGB(20, 20, 22),
-        Size = UDim2.new(1, 0, 0, 44), -- was 65
+        Size = UDim2.new(1, 0, 0, 44),
         BackgroundTransparency = 1,
         ZIndex = 201,
         ClipsDescendants = true
@@ -384,13 +383,13 @@ end)
 pcall(function()
     RunService:UnbindFromRenderStep(ShowCursorBinding)
 end)
-if _G.PanduX_BarConn then
-    pcall(function() _G.PanduX_BarConn:Disconnect() end)
-    _G.PanduX_BarConn = nil
+if _G.FionHub_BarConn then
+    pcall(function() _G.FionHub_BarConn:Disconnect() end)
+    _G.FionHub_BarConn = nil
 end
-if _G.PanduX_WMConn then
-    pcall(function() _G.PanduX_WMConn:Disconnect() end)
-    _G.PanduX_WMConn = nil
+if _G.FionHub_WMConn then
+    pcall(function() _G.FionHub_WMConn:Disconnect() end)
+    _G.FionHub_WMConn = nil
 end
 
 local function GetUiParent()
@@ -409,7 +408,7 @@ pcall(function()
         if not parent then return end
         for _, gui in ipairs(parent:GetChildren()) do
             local n = tostring(gui.Name)
-            if string.find(n, "ZyronX_UI") or string.find(n, "PanduX") then
+            if string.find(n, "FionHub_UI") or string.find(n, "FionHub") then
                 gui:Destroy()
             end
         end
@@ -447,17 +446,16 @@ function Library:CreateWindow(options)
     local SubTextColor    = Library.Scheme.SubTextColor
     local OutlineColor    = Library.Scheme.OutlineColor
 
-    local hubName = "PanduX Ui Lib"
-    local subText = "Made By Pandu"
+    local hubName = "FionHub"
+    local subText = "Made by FionHub"
     local subColor = AccentColor
     local sphTextToggle = false
-    local sphWords = "ZX"
+    local sphWords = "FH"
     local sphImage = nil
     local topbarLogo = nil
     local logoSize = 32
     local sphIconSize = 26
     
-    -- // Deteksi Device (Sama Persis Seperti Obsidian)
 local isMobileDevice = UserInputService.TouchEnabled
 if not isMobileDevice then
     pcall(function()
@@ -480,7 +478,6 @@ local MAX_W, MAX_H = 900, 560
             WIN_H = math.clamp(options.Size.Y.Offset, MIN_H, MAX_H)
         end
         
-        -- watermark hanya ON kalau user set Watermark = true
         Library.Watermark.Enabled = options.Watermark == true
         if type(options.WatermarkText) == "string" then
             Library.Watermark.Text = options.WatermarkText
@@ -490,7 +487,6 @@ local MAX_W, MAX_H = 900, 560
             Library.Watermark.Icon = options.WatermarkIcon
         end
         
-        -- [BARU] sidebar compact
         if options.SidebarCompacted == true then
             SIDE_W = 52
         end
@@ -499,7 +495,6 @@ local MAX_W, MAX_H = 900, 560
             sphTextToggle = options.SphereText
         end
         if options.SphereWords ~= nil then
-            -- Enforce 2-word limit logic
             local wordList = string.split(tostring(options.SphereWords), " ")
             if #wordList > 2 then
                 sphWords = wordList[1] .. " " .. wordList[2]
@@ -518,7 +513,7 @@ local MAX_W, MAX_H = 900, 560
 
     local uniqueID = HttpService:GenerateGUID(false)
     local ScreenGui = Create("ScreenGui", {
-        Name = "ZyronX_UI_" .. uniqueID,
+        Name = "FionHub_UI_" .. uniqueID,
         Parent = GetUiParent(),
         ResetOnSpawn = false,
         IgnoreGuiInset = true
@@ -526,7 +521,6 @@ local MAX_W, MAX_H = 900, 560
     
     Library._ScreenGui = ScreenGui
     
-    -- // CRITICAL: Modal Element untuk unlock mouse (dari Obsidian)
 local ModalElement = Create("TextButton", {
     Parent = ScreenGui,
     BackgroundTransparency = 1,
@@ -539,7 +533,7 @@ local ModalElement = Create("TextButton", {
     local NotifContainer = Create("Frame", {
     Parent = ScreenGui,
     BackgroundTransparency = 1,
-    Size = UDim2.new(0, 240, 1, -20), -- was 320
+    Size = UDim2.new(0, 240, 1, -20),
     Position = UDim2.new(1, -260, 0, 10),
     ZIndex = 200,
     Active = false
@@ -547,7 +541,7 @@ local ModalElement = Create("TextButton", {
     Create("UIListLayout", {Parent = NotifContainer, VerticalAlignment = Enum.VerticalAlignment.Bottom, HorizontalAlignment = Enum.HorizontalAlignment.Right, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 12)})
     GlobalNotifContainer = NotifContainer
     
-    -- ===== WATERMARK (1 pill, draggable) =====
+    -- ===== WATERMARK =====
     local WM = Library.Watermark or {}
     local WatermarkHold = Create("Frame", {
         Parent = ScreenGui,
@@ -598,7 +592,6 @@ local ModalElement = Create("TextButton", {
         ZIndex = 182,
     })
 
-    -- bisa digeser dari pill-nya
     MakeDraggable(CenterPill, WatermarkHold)
 
     local wmFrames, wmLast, wmFPS = 0, tick(), 60
@@ -646,7 +639,7 @@ local ModalElement = Create("TextButton", {
         end
 
         local mid = table.concat(parts, "  |  ")
-        if mid == "" then mid = "Pandu" end
+        if mid == "" then mid = "FionHub" end
         CenterText.Text = mid
         FitPill(mid)
     end
@@ -654,13 +647,13 @@ local ModalElement = Create("TextButton", {
     Library._UpdateWatermark = UpdateWatermark
     UpdateWatermark(true)
 
-    if _G.PanduX_WMConn then
-        pcall(function() _G.PanduX_WMConn:Disconnect() end)
+    if _G.FionHub_WMConn then
+        pcall(function() _G.FionHub_WMConn:Disconnect() end)
     end
     wmConn = Track(RunService.Heartbeat:Connect(function()
     UpdateWatermark(false)
 end))
-_G.PanduX_WMConn = wmConn
+_G.FionHub_WMConn = wmConn
 
     local function SendPremiumNotification()
         local Notif = Create("Frame", {Parent = NotifContainer, BackgroundColor3 = Color3.fromRGB(20, 20, 22), Size = UDim2.new(1, 0, 0, 65), BackgroundTransparency = 1, ZIndex = 201, ClipsDescendants = true})
@@ -776,9 +769,6 @@ _G.PanduX_WMConn = wmConn
     Tween(MainScale, {Scale = 1}, 0.5)
     Tween(MainFrame, {BackgroundTransparency = 0}, 0.5)
 
-    -- // CORE ENGINE ADDITION: Floating Bottom Bar Natively Attached to ScreenGui
-    
-    -- The Drag Hitbox (Invisible but large for easy grabbing)
     local BottomDragHitbox = Create("Frame", {
         Parent = ScreenGui,
         BackgroundTransparency = 1,
@@ -788,7 +778,6 @@ _G.PanduX_WMConn = wmConn
         Active = true
     })
 
-    -- The Visible Modern Bar (Sleeker, pill-shaped, dark gray outline)
     local FloatingBottomBar = Create("Frame", {
         Parent = BottomDragHitbox,
         BackgroundColor3 = CardColor,
@@ -805,7 +794,6 @@ _G.PanduX_WMConn = wmConn
         Transparency = 0
     })
 
-    -- Drags MainFrame when the larger invisible hitbox is pulled. Sync is perfect.
     MakeDraggable(BottomDragHitbox, MainFrame)
 
 local ResizeHit = Create("TextButton", {
@@ -855,7 +843,7 @@ local ResizeHit = Create("TextButton", {
         MainFrame.Size = UDim2.new(0, WIN_W, 0, WIN_H)
     end)
     if BarConn then pcall(function() BarConn:Disconnect() end) end
-    if _G.PanduX_BarConn then pcall(function() _G.PanduX_BarConn:Disconnect() end) end
+    if _G.FionHub_BarConn then pcall(function() _G.FionHub_BarConn:Disconnect() end) end
 BarConn = Track(RunService.Heartbeat:Connect(function()
     if not MainFrame or not MainFrame.Parent or not MainFrame.Visible then return end
     if not BottomDragHitbox or not BottomDragHitbox.Parent then return end
@@ -873,19 +861,19 @@ BarConn = Track(RunService.Heartbeat:Connect(function()
     end)
 end))
 
-_G.PanduX_BarConn = BarConn
+_G.FionHub_BarConn = BarConn
 
 ScreenGui.Destroying:Connect(function()
     pcall(function() RunService:UnbindFromRenderStep(ShowCursorBinding) end)
     if ModalElement then ModalElement.Modal = false end
     if BarConn then pcall(function() BarConn:Disconnect() end) end
-    if _G.PanduX_WMConn then
-        pcall(function() _G.PanduX_WMConn:Disconnect() end)
-        _G.PanduX_WMConn = nil
+    if _G.FionHub_WMConn then
+        pcall(function() _G.FionHub_WMConn:Disconnect() end)
+        _G.FionHub_WMConn = nil
     end
-    if _G.PanduX_BarConn then
-        pcall(function() _G.PanduX_BarConn:Disconnect() end)
-        _G.PanduX_BarConn = nil
+    if _G.FionHub_BarConn then
+        pcall(function() _G.FionHub_BarConn:Disconnect() end)
+        _G.FionHub_BarConn = nil
     end
     pcall(function()
         UserInputService.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.None
@@ -955,7 +943,6 @@ local SearchBar = Create("Frame", {
     Library:ApplyIcon(MoveIcon, "move", AccentColor)
     MakeDraggable(MoveBtn, MainFrame)
 
-    -- [UBAH]
     local Sidebar = Create("Frame", {Parent = MainFrame, BackgroundColor3 = BackgroundColor, BackgroundTransparency = 1, Size = UDim2.new(0, SIDE_W, 1, -40), Position = UDim2.new(0, 0, 0, 40), Active = true})
     local TabSearchBox = Create("TextBox", {Parent = Sidebar, BackgroundColor3 = CardColor, Size = UDim2.new(1, -20, 0, 26), Position = UDim2.new(0, 10, 0, 5), Font = Enum.Font.Gotham, TextSize = 12, TextColor3 = TextColor, PlaceholderText = "Search tabs...", TextXAlignment = Enum.TextXAlignment.Left, ClearTextOnFocus = false})
     if SIDE_W <= 60 then
@@ -999,7 +986,6 @@ local UserInfo = Create("Frame", {
     ZIndex = 5,
 })
 
--- [BARU]
     if SIDE_W <= 60 then
         UserInfo.Visible = false
     end
@@ -1060,7 +1046,6 @@ Create("TextLabel", {
     TextColor3 = SubTextColor,
     Text = "@" .. maskUserName(LP.Name),
 })
-    -- [UBAH]
     local Divider = Create("Frame", {Parent = MainFrame, BackgroundColor3 = Color3.fromRGB(40, 40, 45), BorderSizePixel = 0, Size = UDim2.new(0, 1, 1, -40), Position = UDim2.new(0, SIDE_W, 0, 40)})
     local ContentArea = Create("Frame", {Parent = MainFrame, BackgroundTransparency = 1, Size = UDim2.new(1, -(SIDE_W + 5), 1, -40), Position = UDim2.new(0, SIDE_W + 5, 0, 40), Active = true})
 
@@ -1068,12 +1053,10 @@ Create("TextLabel", {
     Create("UICorner", {Parent = Sphere, CornerRadius = UDim.new(0, 6)})
     Create("UIStroke", {Parent = Sphere, Color = OutlineColor, Thickness = 1.5})
     
-    -- MODIFIED SECTION: Text Label prioritized if SphereText toggle is true. Avoids passing boolean as Text.
     local SphereImageLabel = Create("ImageLabel", {Parent = Sphere, BackgroundTransparency = 1, Size = UDim2.new(0, sphIconSize, 0, sphIconSize), Position = UDim2.new(0.5, 0, 0.5, 0), AnchorPoint = Vector2.new(0.5, 0.5), Image = sphImage or "", ImageTransparency = 1, Visible = (not sphTextToggle and sphImage ~= nil)})
     local SphereTextLabel = Create("TextLabel", {Parent = Sphere, Text = sphWords, Font = Enum.Font.GothamBold, TextSize = 16, TextColor3 = AccentColor, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 1, 0), TextTransparency = 1, Visible = sphTextToggle})
     MakeDraggable(Sphere, Sphere)
     
--- // Obsidian Style Cursor (Sama Persis)
 local CustomCursor = Create("Frame", {
     Parent = ScreenGui,
     BackgroundColor3 = Color3.fromRGB(255, 255, 255),
@@ -1114,7 +1097,6 @@ Create("Frame", {
     BorderSizePixel = 0,
 })
 
--- Custom Image (optional)
 local CursorCustomImage = Create("ImageLabel", {
     Parent = CustomCursor,
     AnchorPoint = Vector2.new(0.5, 0.5),
@@ -1126,7 +1108,6 @@ local CursorCustomImage = Create("ImageLabel", {
     BorderSizePixel = 0,
 })
 
--- // SetCustomCursor (Sama Persis Seperti Obsidian)
 Library.OriginalMouseIconEnabled = UserInputService.MouseIconEnabled
 Library.ShowCustomCursor = true
 local isMobileCursor = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
@@ -1137,7 +1118,6 @@ local function RestoreMouseIcon()
     if restoringCursor then return end
     restoringCursor = true
 
-    -- [1] lepas cursor dulu
     pcall(function()
         RunService:UnbindFromRenderStep(ShowCursorBinding)
     end)
@@ -1146,12 +1126,10 @@ local function RestoreMouseIcon()
         CustomCursor.Visible = false
     end
 
-    -- [2] lepas kunci input
     if ModalElement then
         ModalElement.Modal = false
     end
 
-    -- [3] kembalikan mouse game (Obsidian)
     pcall(function()
         UserInputService.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.None
     end)
@@ -1169,7 +1147,6 @@ local function SetCustomCursor(on)
     end
 
     if on then
-        -- simpan state game SEBELUM modal nyala
         Library.OriginalMouseIconEnabled = UserInputService.MouseIconEnabled
 
         if not MainFrame or not MainFrame.Parent or not MainFrame.Visible then
@@ -1188,7 +1165,7 @@ local function SetCustomCursor(on)
         pcall(function()
             RunService:BindToRenderStep(ShowCursorBinding, Enum.RenderPriority.Last.Value, function()
                 if not MainFrame or not MainFrame.Parent or not MainFrame.Visible then
-                    return -- jangan Restore di dalam RenderStep
+                    return
                 end
                 UserInputService.MouseIconEnabled = not Library.ShowCustomCursor
                 local pos = UserInputService:GetMouseLocation()
@@ -1215,7 +1192,6 @@ end
         Library.MenuKey = ParseKey(key)
     end
     
-    -- // Fade system (mirip Obsidian)
 local TransparencyCache = {}
 
 local function CacheAndFade(inst, props, targetTransparency, duration)
@@ -1238,17 +1214,13 @@ local function CacheAndFade(inst, props, targetTransparency, duration)
     end
 end
 
--- [UBAH] jangan fade transparan, biar menu langsung ilang
 local function FadeWindow(show)
     Tween(MainScale, {Scale = show and 1 or 0.96}, 0.12)
 end
 
--- [UBAH] langsung hide, tanpa delay 0.2
 local function HideWindow()
-    -- [1] lepas modal + cursor DULU
     SetCustomCursor(false)
 
-    -- [2] baru hide UI
     MainFrame.Visible = false
     BottomDragHitbox.Visible = false
 
@@ -1298,7 +1270,6 @@ end))
         Window.CurrentTransparency = val
         if MainFrame.Visible then
             Tween(MainFrame, {BackgroundTransparency = val}, 0.3)
-            -- Dynamic floating bottom bar transparency control integrated
             Tween(FloatingBottomBar, {BackgroundTransparency = val > 0 and 0.2 or 0}, 0.3)
         end
     end
@@ -1614,7 +1585,6 @@ local CollapseBtn = Create("TextButton", {
     AutoButtonColor = false
 })
 
--- [TAMBAH] garis pemisah judul <-> fitur (gaya Obsidian)
 local SectionLine = Create("Frame", {
     Parent = SectionContainer,
     BackgroundColor3 = OutlineColor,
@@ -1933,7 +1903,6 @@ end
 
                     local api = {}
 
-                    -- [TAMBAH]
                     api.Set = internalSet
                     api.SetValue = internalSet
                     function api:Set(v) internalSet(v) end
@@ -1941,7 +1910,6 @@ end
                     function api:Get() return state end
 
                     function api:AddKeyPicker(defaultKey, extra)
-                        -- [UBAH] support AddKeyPicker("Q") dan AddKeyPicker("Flag", { Default, Callback })
                         if type(defaultKey) == "table" then
                             extra = defaultKey
                             defaultKey = extra.Default or extra.default or extra.Key
@@ -1989,12 +1957,12 @@ Chip.Size = UDim2.new(0, 44, 0, 16)
                                 end
                                 bind = input.KeyCode
                                 Chip.Text = KeyName(bind)
-                                Library:SafeCallback(keyCb, KeyName(bind)) -- [TAMBAH]
+                                Library:SafeCallback(keyCb, KeyName(bind))
                                 return
                             end
                             if bind and not gpe and input.KeyCode == bind then
                                 internalSet(not state)
-                                Library:SafeCallback(keyCb, state) -- [TAMBAH]
+                                Library:SafeCallback(keyCb, state)
                             end
                         end)
                         local keyFlag = flag .. "_Key"
@@ -2010,7 +1978,6 @@ Chip.Size = UDim2.new(0, 44, 0, 16)
                     end
 
                     function api:AddColorPicker(defaultColor, colorCb)
-                        -- [FIX] terima function ATAU table { Title, Callback } seperti Obsidian
                         local infoData = nil
                         if type(defaultColor) == "table" and defaultColor.Callback then
                             colorCb = defaultColor
@@ -2087,7 +2054,6 @@ Chip.Size = UDim2.new(0, 44, 0, 16)
                             color = Color3.fromHSV(h, s, v_hsv)
                             Swatch.BackgroundColor3 = color
                             SV.BackgroundColor3 = Color3.fromHSV(h, 1, 1)
-                            -- [FIX] jangan panggil table
                             if type(colorCb) == "function" then
                                 colorCb(color)
                             end
@@ -2150,8 +2116,7 @@ Chip.Size = UDim2.new(0, 44, 0, 16)
 
                     return api
                 end
-                
--- [TAMBAH] Checkbox gaya Obsidian + color picker + save config
+
                 function Elements:AddCheckbox(name, default, callback, extra)
                     extra = type(extra) == "table" and extra or {}
                     if type(callback) == "table" then
@@ -2212,7 +2177,6 @@ Check:SetAttribute("SkipFade", true)
                         Size = UDim2.new(1, -42, 1, 0)
                     })
 
-                    -- [TAMBAH] holder kanan buat color picker
                     local AddonHolder = Instance.new("Frame")
                     AddonHolder.Parent = Row
                     AddonHolder.BackgroundTransparency = 1
@@ -2269,7 +2233,6 @@ Check:SetAttribute("SkipFade", true)
                     function api:SetValue(v) internalSet(v) end
                     function api:Get() return state end
 
-                    -- [TAMBAH] ColorPicker nempel di checkbox, sama pola toggle
                     function api:AddColorPicker(defaultColor, colorCb)
                         local infoData = nil
                         if type(defaultColor) == "table" and defaultColor.Callback then
@@ -2515,7 +2478,6 @@ Library.Options[flag] = { Type = "Keybind", Value = KeyName(bind) }
                 function Elements:AddDropdown(name, options, isMulti, callback, extra)
     extra = type(extra) == "table" and extra or {}
 
-    -- [OBSIDIAN] AddDropdown("Flag", { Values = {...}, Default, Multi, Callback })
     if type(options) == "table" and (options.Values or options.values or options.Callback or options.Flag) and options[1] == nil then
         extra = options
         name = options.Text or options.Title or options.Name or name
@@ -2542,7 +2504,6 @@ Library.Options[flag] = { Type = "Keybind", Value = KeyName(bind) }
                 table.insert(clean, tostring(opt))
             end
         end
-        -- fallback kalau user kirim dict { Head = true } tanpa array
         if #clean == 0 then
             for k, v in pairs(list) do
                 if type(k) == "string" and k ~= "Callback" and k ~= "callback" and k ~= "Flag" and k ~= "flag" and k ~= "Default" then
@@ -2766,7 +2727,6 @@ Library.Options[flag] = { Type = "Textbox", Value = Input.Text, SetValue = inter
                 end
 
                 function Elements:AddColorPicker(name, defaultColor, callback, infoData)
-                        -- [FIX] Obsidian-style: argumen bisa table { Title, Callback, Default }
                         if type(defaultColor) == "table" and (defaultColor.Callback or defaultColor.callback) then
                             infoData = defaultColor
                             callback = defaultColor.Callback or defaultColor.callback
@@ -2894,7 +2854,7 @@ Library.Options[colorFlag] = { Type = "ColorPicker", Value = color, SetValue = i
                 end
 
                 function Elements:AddConfigManager(folderName)
-                    folderName = folderName or "zyronxSavers"
+                    folderName = folderName or "FionHubSavers"
                     if not _isfolder(folderName) then _makefolder(folderName) end
                     local autoloadPath = folderName .. "/autoload.txt"
                     local selectedPath, selectedDisplay = nil, nil
